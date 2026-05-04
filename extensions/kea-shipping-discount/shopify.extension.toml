@@ -1,0 +1,21 @@
+api_version = "2026-04"
+
+[[extensions]]
+name = "t:name"
+handle = "kea-shipping-discount"
+type = "function"
+uid = "f2b33091-1b84-b755-2de7-18b7836472189feee679"
+description = "t:description"
+
+  [[extensions.targeting]]
+  target = "purchase.shipping-discount.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"
+
+  [extensions.ui.paths]
+  create = "/"
+  details = "/"

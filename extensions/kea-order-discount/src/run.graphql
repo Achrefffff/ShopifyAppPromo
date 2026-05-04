@@ -1,0 +1,32 @@
+query RunInput {
+  cart {
+    buyerIdentity {
+      customer {
+        numberOfOrders
+        email
+      }
+    }
+    cost {
+      subtotalAmount {
+        amount
+      }
+    }
+    lines {
+      quantity
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          id
+          product {
+            id
+          }
+        }
+      }
+    }
+  }
+  discountNode {
+    metafield(namespace: "kea_promo", key: "config") {
+      value
+    }
+  }
+}

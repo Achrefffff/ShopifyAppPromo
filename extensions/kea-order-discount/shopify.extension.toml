@@ -1,0 +1,21 @@
+api_version = "2026-04"
+
+[[extensions]]
+name = "t:name"
+handle = "kea-order-discount"
+type = "function"
+uid = "fdb43efd-c6b7-9623-e518-2e59573a59ce09d87ab1"
+description = "t:description"
+
+  [[extensions.targeting]]
+  target = "purchase.order-discount.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"
+
+  [extensions.ui.paths]
+  create = "/"
+  details = "/"

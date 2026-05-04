@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+model Promotion {
+  id                String    @id @default(cuid())
+  shop              String
+
+  // Info
+  name              String
+  description       String?
+
+  // Status & scheduling
+  status            String    @default("draft")    // draft | active | scheduled | paused | expired
+  priority          Int       @default(0)
+  startDate         DateTime?
+  endDate           DateTime?
+
+  // Rules (stored as JSON for flexibility)
+  conditionLogic    String    @default("all")       // "all" (AND) | "any" (OR)
+  conditions        String    @default("[]")        // JSON array of condition objects
+  action            String    @default("{}")        // JSON action object
+
+  // Stacking
+  combinable        Boolean   @default(false)
+
+  // Progress bar (storefront display)
+  showProgressBar   Boolean   @default(false)
+  progressMessage   String?   @default("Plus que {remaining}€ pour obtenir {reward}")
+  completionMessage String?   @default("🎉 Vous avez débloqué {reward} !")
+  barColor          String?   @default("#4CAF50")
+  barIcon           String?   @default("🎁")
+
+  // Shopify link
+  shopifyDiscountId String?
+  functionType      String?   // "order_discount" | "product_discount"
+
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([shop])
+  @@index([shop, status])
+}

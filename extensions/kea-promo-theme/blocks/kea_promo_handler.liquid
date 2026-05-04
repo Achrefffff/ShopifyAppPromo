@@ -1,0 +1,15 @@
+<script>
+  window.KeaPromo = {
+    shop: "{{ shop.permanent_domain }}",
+    rules: {% if shop.metafields.kea_promo.active_promotions.value %}{{ shop.metafields.kea_promo.active_promotions.value | json }}{% else %}[]{% endif %}
+  };
+  console.log("Kea Promo initialized with rules:", window.KeaPromo.rules);
+</script>
+{% schema %}
+{
+  "name": "Kea Promo Handler",
+  "target": "body",
+  "javascript": "kea-promo.js",
+  "settings": []
+}
+{% endschema %}
