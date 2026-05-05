@@ -2,12 +2,11 @@
 
 client_id = "e4f12416d51deb35b402a6f14e61bc38"
 name = "kea-promo-v2"
-application_url = "https://example.com"
+application_url = "https://kea-promo.onrender.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
-include_config_on_deploy = true
 
 [webhooks]
 api_version = "2026-04"
@@ -27,4 +26,7 @@ optional_scopes = [ ]
 use_legacy_install_flow = false
 
 [auth]
-redirect_urls = [ ]
+redirect_urls = [
+  "https://kea-promo.onrender.com/auth/callback",
+  "https://kea-promo.onrender.com/auth"
+]
