@@ -23,7 +23,6 @@ export function validatePromotion(data: {
 }): ValidationErrors {
   const errors: ValidationErrors = {};
 
-  // Name is required
   if (!data.name || data.name.trim().length === 0) {
     errors.name = "Le nom de la promotion est requis";
   } else if (data.name.trim().length > 100) {
