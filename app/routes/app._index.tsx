@@ -36,7 +36,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     case "delete":
       const promoToDelete = await getPromotion(id, session.shop);
       if (promoToDelete?.shopifyDiscountId) {
-        try { await deleteDiscount(promoToDelete.shopifyDiscountId, admin.graphql); } catch (e) {}
+        try {
+          await deleteDiscount(promoToDelete.shopifyDiscountId, admin.graphql);
+        } catch (e: any) {
+          console.error(`Failed to delete Shopify discount for promotion ${id}:`, e.message);
+        }
       }
       await deletePromotion(id, session.shop);
       await syncActivePromotionsMetafield(admin.graphql, session.shop);
@@ -46,10 +50,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       const newStatus = await togglePromotionStatus(id, session.shop);
       const updatedPromo = await getPromotion(id, session.shop);
       if (updatedPromo) {
-        try { 
-          await upsertDiscount(id, updatedPromo as any, admin.graphql, session.shop); 
+        try {
+          await upsertDiscount(id, updatedPromo as any, admin.graphql, session.shop);
           // syncActivePromotionsMetafield is called inside upsertDiscount
-        } catch (e) {}
+        } catch (e: any) {
+          console.error(`Failed to sync Shopify discount after toggle for promotion ${id}:`, e.message);
+        }
       }
       return { success: true, message: `Promotion ${newStatus === "active" ? "activée" : "mise en pause"}` };
 
@@ -227,9 +233,9 @@ export default function PromotionsDashboard() {
           </>
         )}
       </s-page>
-      <div style={{ 
-        textAlign: 'center', 
-        padding: '30px 20px', 
+      <div style={{
+        textAlign: 'center',
+        padding: '30px 20px',
         fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
         fontSize: '14px',
         letterSpacing: '-0.01em'

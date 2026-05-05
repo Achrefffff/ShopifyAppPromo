@@ -26,25 +26,35 @@ async function resolveCollectionProductIds(
   graphql: AdminApiContext["graphql"]
 ): Promise<string[]> {
   const productIds: string[] = [];
+  let hasNextPage = true;
+  let cursor: string | null = null;
+  const pageSize = 250;
 
   try {
-    const response = await graphql(
-      `#graphql
-      query GetCollectionProducts($collectionId: ID!) {
-        collection(id: $collectionId) {
-          products(first: 250) {
-            nodes {
-              id
+    while (hasNextPage) {
+      const gqlResponse: Response = await graphql(
+        `#graphql
+        query GetCollectionProducts($collectionId: ID!, $first: Int!, $after: String) {
+          collection(id: $collectionId) {
+            products(first: $first, after: $after) {
+              nodes { id }
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
             }
           }
-        }
-      }`,
-      { variables: { collectionId: collectionGid } }
-    );
-    const data = await response.json();
-    const nodes = data.data?.collection?.products?.nodes || [];
-    for (const node of nodes) {
-      productIds.push(node.id);
+        }`,
+        { variables: { collectionId: collectionGid, first: pageSize, after: cursor } }
+      );
+      const gqlData: any = await gqlResponse.json();
+      const products = gqlData.data?.collection?.products;
+      const nodes = products?.nodes || [];
+      for (const node of nodes) {
+        productIds.push(node.id);
+      }
+      hasNextPage = products?.pageInfo?.hasNextPage ?? false;
+      cursor = products?.pageInfo?.endCursor ?? null;
     }
   } catch (e) {
     console.error(`Failed to resolve collection ${collectionGid}:`, e);
@@ -62,23 +72,33 @@ async function resolveTagProductIds(
   graphql: AdminApiContext["graphql"]
 ): Promise<string[]> {
   const productIds: string[] = [];
+  let hasNextPage = true;
+  let cursor: string | null = null;
+  const pageSize = 250;
 
   try {
-    const response = await graphql(
-      `#graphql
-      query GetProductsByTag($query: String!) {
-        products(first: 250, query: $query) {
-          nodes {
-            id
+    while (hasNextPage) {
+      const gqlResponse: Response = await graphql(
+        `#graphql
+        query GetProductsByTag($query: String!, $first: Int!, $after: String) {
+          products(first: $first, query: $query, after: $after) {
+            nodes { id }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
           }
-        }
-      }`,
-      { variables: { query: `tag:${tag}` } }
-    );
-    const data = await response.json();
-    const nodes = data.data?.products?.nodes || [];
-    for (const node of nodes) {
-      productIds.push(node.id);
+        }`,
+        { variables: { query: `tag:${tag}`, first: pageSize, after: cursor } }
+      );
+      const gqlData: any = await gqlResponse.json();
+      const products = gqlData.data?.products;
+      const nodes = products?.nodes || [];
+      for (const node of nodes) {
+        productIds.push(node.id);
+      }
+      hasNextPage = products?.pageInfo?.hasNextPage ?? false;
+      cursor = products?.pageInfo?.endCursor ?? null;
     }
   } catch (e) {
     console.error(`Failed to resolve products with tag "${tag}":`, e);
@@ -466,7 +486,7 @@ export async function syncActivePromotionsMetafield(
     for (const p of activePromos) {
       let action: any = p.action;
       while (typeof action === "string") { action = JSON.parse(action); }
-      
+
       let conditions = p.conditions;
       while (typeof conditions === "string") { conditions = JSON.parse(conditions); }
 
@@ -534,7 +554,7 @@ async function getShopId(graphql: AdminApiContext["graphql"]): Promise<string> {
   return data.data.shop.id;
 }
 
-async function resolveFirstVariantInfo(productGid: string, graphql: AdminApiContext["graphql"]): Promise<{id: string, price: string} | null> {
+async function resolveFirstVariantInfo(productGid: string, graphql: AdminApiContext["graphql"]): Promise<{ id: string, price: string } | null> {
   try {
     const response = await graphql(
       `#graphql
